@@ -61,7 +61,6 @@ fn main() {
 
     let triple = format!("{}-{}-{}", ARCH, VENDOR, OS);
     let mut ir = ir::Ir::new(triple);
-    println!("{}", ir.dump());
 
     // Create target file
     //
@@ -81,7 +80,7 @@ fn main() {
     // Generate IR
     for i in results.iter() {
         for s in i.strings.iter() {
-            for m in s.matches.iter() {
+            for _ in s.matches.iter() {
                 match i.metadatas[0].value {
                     yara::MetadataValue::String(s) => ir.add_to_main(s),
                     _ => panic!("Value must be a string!"),

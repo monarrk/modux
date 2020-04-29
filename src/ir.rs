@@ -16,6 +16,6 @@ impl Ir {
     }
 
     pub fn dump(&self) -> String {
-        format!("; Header\n{}\n; Main\n{}}}", self.header, self.main)
+        format!("; Header\n{}\n; Main\n{}\nret i32 0\n}}", self.header, self.main)
     }
 }

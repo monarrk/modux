@@ -1,34 +1,10 @@
-rule number
+rule def_i32
 {
 	meta:
-	ir = "; test"
+	ir = "%1 = alloca i32, align 4\nstore i32 0, i32* %1, align 4"
 
 	strings:
-	$num = /[0-9]/
-
-	condition:
-	any of them
-}
-
-rule boolean
-{
-	meta:
-	ir = "; test"
-
-	strings:
-	$boolean = /(true|false)/
-
-	condition:
-	any of them
-}
-
-rule char
-{
-	meta:
-	ir = "; test"
-
-	strings:
-	$ident = /'[a-zA-Z]'/
+	$def = "def i32"
 
 	condition:
 	any of them
