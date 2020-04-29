@@ -16,62 +16,47 @@ impl Ir {
     }
 
     // TODO this is an insane hack
-    pub fn add_to_main(&mut self, emit: &str, what: &str, start: usize, end: usize) {
-        let mut start_index = 0usize;
-        let mut state = State::Start;
-        let mut string = String::new();
+    pub fn add_to_main(&mut self, emit: &str, what: &str, start: &str, end: &str) {
+        let starts: Vec<&str> = start.split(":").collect();
+        let ends: Vec<&str> = end.split(":").collect();
 
+        let mut emit_mut: Vec<char> = emit.chars().collect();
+        let mut arg = 0usize;
+
+        let mut skip = false;
         for (i, c) in emit.chars().enumerate() {
-            match state {
-                State::Start => match c {
-                    '{' => {
-                        if start_index < i {
-                            //string += &emit[start_index..i];
-                        }
-                        state = State::Open;
-                    },
-                    '}' => {
-                        if start_index < i {
-                            string += &emit[start_index..i];
-                        }
-                        state = State::Close;
-                    },
-                    _ => {},
-                },
-                State::Open => match c {
-                    '{' => {
-                        state = State::Start;
-                        string += &emit[start_index..i];
-                        start_index = i;
-                    },
-                    '}' => {
-                        string += &what[start..end];
-                        state = State::Start;
-                        start_index = i + 1;
-                    },
-                    _ => panic!("Uknown format character: {}", c),
-                },
-                State::Close => match c {
-                    '}' => {
-                        state = State::Start;
-                        start_index = i;
-                    },
-                    _ => panic!("Single '}' encountered"),
-                },
+            if skip {
+                skip = false;
+                continue;
+            }
+            if c == '#' && emit.len() > i {
+                if emit.chars().nth(i + 1).unwrap() != '#' {
+                    println!("i @ : '{}'", emit_mut[i]);
+                    emit_mut.remove(i);
+                    let mut first = emit_mut.clone();
+                    let last = first.split_off(i);
+                    //println!("first: {}\nlast: {}", first.iter().collect::<String>(), last.iter().collect::<String>());
+                    let mut vec: Vec<char> = Vec::new();
+                    println!("{}", &what[starts[arg].parse::<usize>().expect("Failed to parse string")..ends[arg].parse::<usize>().expect("Failed to parse string")]);
+                    for c in (&what[starts[arg].parse::<usize>().expect("Failed to parse string")..ends[arg].parse::<usize>().expect("Failed to parse string")]).chars() {
+                        vec.push(c);
+                    }
+                    first = [first, vec[..].to_vec()].concat();
+                    emit_mut = [first, last.to_vec()].concat();
+                    arg += 1;
+                    skip = true;
+                } else {
+                    emit_mut.remove(i);
+                }
             }
         }
 
-        self.main = format!("{}{}\n", self.main, emit.replace("{}", &string));
+        let to_emit: String = emit_mut.into_iter().collect();
+        println!("to_emit: {}", to_emit);
+        self.main = format!("{}\t{}\n", self.main, to_emit);
     }
 
     pub fn dump(&self) -> String {
-        format!("; Header\n{}\n; Main\n{}\nret i32 0\n}}", self.header, self.main)
+        format!("; Header\n{}\n; Main\n{}\n\tret i32 0\n}}", self.header, self.main)
     }
-}
-
-// for Ir.add_to_main()
-enum State {
-    Start,
-    Open,
-    Close
 }

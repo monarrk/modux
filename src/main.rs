@@ -84,16 +84,16 @@ fn main() {
                 match i.metadatas[0].value {
                     yara::MetadataValue::String(s) => {
                         if i.metadatas.len() > 1 {
-                            let start = match i.metadatas[1].value {
-                                yara::MetadataValue::Integer(i) => i,
-                                _ => panic!("Value must be an integer!"),
+                            let start = match i.metadatas[2].value {
+                                yara::MetadataValue::String(i) => i,
+                                _ => panic!("Value must be a String!"),
                             };
-                            let end = match i.metadatas[2].value {
-                                yara::MetadataValue::Integer(i) => i,
-                                _ => panic!("Value must be an integer!"),
+                            let end = match i.metadatas[3].value {
+                                yara::MetadataValue::String(i) => i,
+                                _ => panic!("Value must be a String!"),
                             };
 
-                            ir.add_to_main(s, std::str::from_utf8(&m.data).expect("Failed to decode data"), start as usize, end as usize);
+                            ir.add_to_main(s, std::str::from_utf8(&m.data).expect("Failed to decode data"), start, end);
                         } else {
                             ir.add_raw_to_main(s);
                         }
