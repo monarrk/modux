@@ -1,1 +1,2 @@
-def i32
+def i32 a
+mut i32 a 9

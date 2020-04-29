@@ -80,9 +80,24 @@ fn main() {
     // Generate IR
     for i in results.iter() {
         for s in i.strings.iter() {
-            for _ in s.matches.iter() {
+            for m in s.matches.iter() {
                 match i.metadatas[0].value {
-                    yara::MetadataValue::String(s) => ir.add_to_main(s),
+                    yara::MetadataValue::String(s) => {
+                        if i.metadatas.len() > 1 {
+                            let start = match i.metadatas[1].value {
+                                yara::MetadataValue::Integer(i) => i,
+                                _ => panic!("Value must be an integer!"),
+                            };
+                            let end = match i.metadatas[2].value {
+                                yara::MetadataValue::Integer(i) => i,
+                                _ => panic!("Value must be an integer!"),
+                            };
+
+                            ir.add_to_main(s, std::str::from_utf8(&m.data).expect("Failed to decode data"), start as usize, end as usize);
+                        } else {
+                            ir.add_raw_to_main(s);
+                        }
+                    },
                     _ => panic!("Value must be a string!"),
                 }
             }
