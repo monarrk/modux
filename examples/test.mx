@@ -1,11 +1,11 @@
-def a: i32
-a: i32 = 1
+var (test) i32
+i32 [12319] -> (test)
 
-def b: i8
-b: i8 = 7
+var (char) i8
+i8 [5] -> (char)
+
+global str [hello world]{11} -> (hello)
 
 init puts
-puts_char b
-
-global s: str = "abc"
-puts s
+puts_char (char)
+puts (hello){11}

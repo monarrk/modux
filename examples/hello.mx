@@ -1,0 +1,4 @@
+init puts
+
+global str [hello world]{11} -> (hello)
+puts (hello){11}

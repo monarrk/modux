@@ -15,6 +15,7 @@ impl Ir {
         self.main = format!("{}{}\n", self.main, what);
     }
 
+    // Perform substitutions if need be
     fn parse(emit: &str, what: &str, start: &str, end: &str) -> String{
         let starts: Vec<&str> = start.split(":").collect();
         let ends: Vec<&str> = end.split(":").collect();
@@ -23,6 +24,7 @@ impl Ir {
         let mut arg = 0usize;
 
         let mut skip = false;
+        let mut skips = 0;
         for (i, c) in emit.chars().enumerate() {
             if skip {
                 skip = false;
@@ -32,13 +34,27 @@ impl Ir {
                 skip = true;
                 emit_mut.remove(i);
             } else if c == '#' {
-                emit_mut.remove(i);
+                // substitute # for a string in the IR
+                
+                // Remove extra characters
+                emit_mut.remove(i + skips);
                 let mut first = emit_mut.clone();
-                let last = first.split_off(i);
+                let last = first.split_off(i + skips);
                 let mut vec: Vec<char> = Vec::new();
-                for c in (&what[starts[arg].parse::<usize>().expect("Failed to parse string")..ends[arg].parse::<usize>().expect("Failed to parse string")]).chars() {
-                    vec.push(c);
+                'outer: for (j, a) in what.chars().enumerate() {
+                    // Detected a starting delimeter
+                    if a == starts[arg].chars().collect::<Vec<char>>()[0] {
+                        for b in what[j + 1..].chars() {
+                            if b == ends[arg].chars().collect::<Vec<char>>()[0] {
+                                skips -= 1;
+                                break 'outer;
+                            }
+                            skips += 1;
+                            vec.push(b);
+                        }
+                    };
                 }
+
                 first = [first, vec[..].to_vec()].concat();
                 emit_mut = [first, last.to_vec()].concat();
                 arg += 1;
