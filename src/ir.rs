@@ -6,7 +6,7 @@ pub struct Ir {
 impl Ir {
     pub fn new(triple: String) -> Ir {
         Ir {
-            header: format!("target triple = \"{}\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"", triple),
+            header: format!("target triple = \"{}\"\ntarget datalayout = \"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128\"\n\n", triple),
             main: String::from("define dso_local i32 @main() #0 {\n"),
         }
     }
@@ -15,15 +15,23 @@ impl Ir {
         self.main = format!("{}{}\n", self.main, what);
     }
 
-    pub fn add_to_main(&mut self, emit: &str, what: &str, start: &str, end: &str) {
+    fn parse(emit: &str, what: &str, start: &str, end: &str) -> String{
         let starts: Vec<&str> = start.split(":").collect();
         let ends: Vec<&str> = end.split(":").collect();
 
         let mut emit_mut: Vec<char> = emit.chars().collect();
         let mut arg = 0usize;
 
+        let mut skip = false;
         for (i, c) in emit.chars().enumerate() {
-            if c == '#' {
+            if skip {
+                skip = false;
+                continue;
+            }
+            if c == '#' && emit.chars().nth(i + 1) == Some('#') {
+                skip = true;
+                emit_mut.remove(i);
+            } else if c == '#' {
                 emit_mut.remove(i);
                 let mut first = emit_mut.clone();
                 let last = first.split_off(i);
@@ -38,7 +46,15 @@ impl Ir {
         }
 
         let to_emit: String = emit_mut.into_iter().collect();
-        self.main = format!("{}\t{}\n", self.main, to_emit);
+        format!("\t{}\n", to_emit)
+    }
+
+    pub fn add_to_main(&mut self, emit: &str, what: &str, start: &str, end: &str) {
+        self.main = format!("{}{}", self.main, Ir::parse(emit, what, start, end));
+    }
+
+    pub fn add_to_header(&mut self, emit: &str, what: &str, start: &str, end: &str) {
+        self.header = format!("{}{}", self.header, Ir::parse(emit, what, start, end));
     }
 
     pub fn dump(&self) -> String {

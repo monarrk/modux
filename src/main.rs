@@ -105,6 +105,10 @@ fn main() {
                 match i.metadatas[0].value {
                     yara::MetadataValue::String(s) => {
                         if i.metadatas.len() > 1 {
+                            let loc = match i.metadatas[1].value {
+                                yara::MetadataValue::String(i) => i,
+                                _ => panic!("Value must be a String!"),
+                            };
                             let start = match i.metadatas[2].value {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
@@ -113,8 +117,12 @@ fn main() {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
                             };
-
-                            ir.add_to_main(s, std::str::from_utf8(&m.data).expect("Failed to decode data"), start, end);
+                            
+                            match loc {
+                                "main" => ir.add_to_main(s, std::str::from_utf8(&m.data).expect("Failed to decode data"), start, end),
+                                "header" => ir.add_to_header(s, std::str::from_utf8(&m.data).expect("Failed to decode data"), start, end),
+                                _ => panic!("Invalid location '{}'", loc),
+                            };
                         } else {
                             ir.add_raw_to_main(s);
                         }

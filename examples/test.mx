@@ -1,2 +1,8 @@
-def i32 a
+def a: i32
 a: i32 = 1
+
+def b: i8
+b: i8 = 7
+
+init puts
+puts b
