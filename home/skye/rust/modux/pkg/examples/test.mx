@@ -1,0 +1,11 @@
+var (test) i32
+i32 [12319] -> (test)
+
+var (char) i8
+i8 [5] -> (char)
+
+global str [hello world]{11} -> (hello)
+
+init puts
+puts_char (char)
+puts (hello){11}
