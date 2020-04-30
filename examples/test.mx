@@ -5,4 +5,7 @@ def b: i8
 b: i8 = 7
 
 init puts
-puts b
+puts_char b
+
+global s: str = "abc"
+puts s

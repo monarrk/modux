@@ -58,6 +58,21 @@ rule Mut_char
 	$store and Def_char
 }
 
+rule Def_str
+{
+	meta:
+	ir = "@.# = private unnamed_addr constant [3 x i8] c\"#\", align 1"
+	location = "header"
+	start = "7:17"
+	ends = "8:20"
+
+	strings:
+	$ = /global [a-zA-Z]: str = "[a-zA-Z0-9]{3}"/
+
+	condition:
+	any of them
+}
+
 rule Fn_define_puts
 {
 	meta:
@@ -73,10 +88,25 @@ rule Fn_define_puts
 	any of them
 }
 
-rule Fn_puts
+rule Fn_puts_char
 {
 	meta:
 	ir = "call i32 @puts(i8* %#)"
+	location = "main"
+	starts = "10"
+	ends = "11"
+
+	strings:
+	$ = /puts_char [a-zA-Z]/
+
+	condition:
+	any of them
+}
+
+rule Fn_puts_str
+{
+	meta:
+	ir = "%tmp = alloca i8*, align 8\n\tstore i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.#, i64 0, i64 0), i8** %tmp, align 8\n\t%tmp2 = load i8*, i8** %tmp, align 8\n\tcall i32 @puts(i8* %tmp2)"
 	location = "main"
 	starts = "5"
 	ends = "6"
