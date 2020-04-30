@@ -1,8 +1,0 @@
-; Anything that isn't regular syntax is a comment!
-
-; Add the  function to the header
-init puts
-
-; Strings have a static length defined with {[0-9]*}
-global str [hello world]{11} -> (hello)
-puts (hello){11}
