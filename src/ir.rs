@@ -15,7 +15,6 @@ impl Ir {
         self.main = format!("{}{}\n", self.main, what);
     }
 
-    // TODO this is an insane hack
     pub fn add_to_main(&mut self, emit: &str, what: &str, start: &str, end: &str) {
         let starts: Vec<&str> = start.split(":").collect();
         let ends: Vec<&str> = end.split(":").collect();
@@ -39,7 +38,6 @@ impl Ir {
         }
 
         let to_emit: String = emit_mut.into_iter().collect();
-        println!("to_emit: {}", to_emit);
         self.main = format!("{}\t{}\n", self.main, to_emit);
     }
 
