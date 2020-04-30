@@ -1,11 +1,11 @@
 mod ir;
 
-use std::env;
 use std::io::Write;
 use std::fs::File;
 use std::path::Path;
 use std::process::exit;
 use yara::Compiler;
+use clap::{Arg, App};
 
 #[cfg(target_os = "linux")]
 static OS: &str = "linux";
@@ -35,14 +35,32 @@ static VENDOR: &str = "apple";
 static VENDOR: &str = "pc";
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        eprintln!("Please enter a file");
-        exit(1);
-    }
+    let matches = App::new("Modux")
+        .arg(Arg::with_name("rules")
+             .short("r")
+             .long("rules")
+             .value_name("FILE")
+             .help("Sets a custom rules file (default is `./rules.yara`)")
+             .takes_value(true))
+        .arg(Arg::with_name("output")
+             .short("o")
+             .long("output")
+             .value_name("FILE")
+             .help("Sets a custom output file")
+             .takes_value(true))
+        .arg(Arg::with_name("INPUT")
+             .index(1)
+             .takes_value(true)
+             .value_name("INPUT")
+             .required(true)
+             .help("The file to build"))
+        .get_matches();
+    
+    let input = matches.value_of("INPUT").unwrap_or("main.mx");
 
+    let rules = matches.value_of("rules").unwrap_or("rules.yara");
     let mut compiler = Compiler::new().expect("Failed to initialize compiler");
-    match compiler.add_rules_file("rules.yara") {
+    match compiler.add_rules_file(rules) {
         Ok(_) => {},
         Err(e) => {
             eprintln!("Error whule parsing rules: {}", e);
@@ -57,18 +75,21 @@ fn main() {
             exit(1);
         }
     };
-    let results = rules.scan_file(&args[1], 5).expect("Failed to scan file");
+    let results = rules.scan_file(input, 5).expect("Failed to scan file");
 
     let triple = format!("{}-{}-{}", ARCH, VENDOR, OS);
     let mut ir = ir::Ir::new(triple);
 
     // Create target file
-    //
-    // TODO make this less...like this
-    let path_slice = args[1].split(".").collect::<Vec<&str>>();
-    let path_str = path_slice[0].to_owned();
-    let path_str_full = path_str + ".ll";
-    let path = Path::new(&path_str_full);
+    let path_str = match matches.value_of("output") {
+        Some(s) => String::from(s),
+        None => {
+            let path_slice = input.split(".").collect::<Vec<&str>>();
+            let path_str = path_slice[0].to_owned();
+            path_str + ".ll"
+        }
+    };
+    let path = Path::new(&path_str);
     let mut file = match File::create(path) {
         Ok(f) => f,
         Err(e) => {

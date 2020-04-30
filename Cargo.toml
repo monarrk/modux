@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 yara = "0.4.0"
+clap = "2.33.0"
