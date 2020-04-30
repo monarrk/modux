@@ -6,6 +6,20 @@ An experimental language with extremely modular syntax.
 ### Building
 Run `cargo build`.
 
+### Examples
+Because there is *technically* no syntax, this example is not really an example of the language itself but of the standard syntax. That being said, here's a 'hello world':
+
+```
+; Anything that isn't regular syntax is a comment!
+
+; Add the `puts` function to the header
+init puts
+
+; Strings have a static length defined with {[0-9]*}
+global str [hello world]{11} -> (hello)
+puts (hello){11}
+```
+
 ### Defining syntax
 Syntax is defined using [YARA](https://virustotal.github.io/yara/). To define a chunk of syntax, create a new rule, with strings for each pattern that represents that expression. Use metadata to define the LLVM IR that will be omitted, using `#` for placeholders for characters which will get sliced out of the strings. If you do use placeholders, define the starts and ends of the slice like so:
 
