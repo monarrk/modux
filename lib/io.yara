@@ -3,8 +3,6 @@ rule Fn_define_puts
         meta:
 	ir = "declare i32 @puts(i8* nocapture) nounwind"
 	location = "header"
-	start = ""
-	end = ""
 
 	strings:
 	$ = "init puts"

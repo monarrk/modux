@@ -34,3 +34,9 @@ This will slice the string like `string[0..1]` and `string[3..4]`.
 
 ### Examples
 Go to `examples/`. In here, you will notice two files: `test.mx` and `rules.yara`. `rules.yara` contains all the rules that will be used to parse the file, and all this one does is import the standard syntax. `test.mx` is the code we will actually compile. When in this directory, you can simply run `modux test.mx`, which will scan the `rules.yara` file and compile to LLVM IR. If you wish to import a custom rules file, you can do so with the `-r` flag: `modux -r custom_rules.yara test.mx`.
+
+### Disclaimers
+- This language is a terrible idea
+- This language should not be used for anything
+- This language is a result of procrastination and adderrall
+- Please don't look at my rust code; it is irredeemable

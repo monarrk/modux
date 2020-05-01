@@ -75,7 +75,13 @@ fn main() {
             exit(1);
         }
     };
-    let results = rules.scan_file(input, 5).expect("Failed to scan file");
+    let results = match rules.scan_file(input, 5) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("Error while scanning file {}: {}", input, e);
+            exit(1);
+        },
+    };
 
     let triple = format!("{}-{}-{}", ARCH, VENDOR, OS);
     let mut ir = ir::Ir::new(triple);
@@ -99,20 +105,24 @@ fn main() {
     };
 
     // Generate IR
+    // Unwrap a bunch of objects to get to the stuff we actually need
     for i in results.iter() {
         for s in i.strings.iter() {
             for m in s.matches.iter() {
                 match i.metadatas[0].value {
                     yara::MetadataValue::String(s) => {
-                        if i.metadatas.len() > 1 {
+                        if i.metadatas.len() > 2 {
+                            // Location of the IR
                             let loc = match i.metadatas[1].value {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
                             };
+                            // Starting delimeters
                             let start = match i.metadatas[2].value {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
                             };
+                            // Ending delimeters
                             let end = match i.metadatas[3].value {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
@@ -124,7 +134,17 @@ fn main() {
                                 _ => panic!("Invalid location '{}'", loc),
                             };
                         } else {
-                            ir.add_raw_to_main(s);
+                            // Add the IR without any substitution
+                            let loc = match i.metadatas[1].value {
+                                yara::MetadataValue::String(i) => i,
+                                _ => panic!("Value must be a String!"),
+                            };
+
+                            match loc {
+                                "main" => ir.add_raw_to_main(s),
+                                "header" => ir.add_raw_to_header(s),
+                                _ => panic!("Invalid location: '{}'", loc),
+                            };
                         }
                     },
                     _ => panic!("Value must be a string!"),
