@@ -9,3 +9,9 @@ global str [hello world]{11} -> (hello)
 init puts
 puts_char (char)
 puts (hello){11}
+
+global str [hello from a loop]{17} -> (looped)
+
+loop (a) do
+	puts (looped){17}
+end (a)

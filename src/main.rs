@@ -104,26 +104,49 @@ fn main() {
         }
     };
 
-    // Generate IR
-    // Unwrap a bunch of objects to get to the stuff we actually need
+    // Sort matches
+    let mut ordr = Vec::new();
+    let mut ordm = Vec::new();
     for i in results.iter() {
         for s in i.strings.iter() {
             for m in s.matches.iter() {
-                match i.metadatas[0].value {
+                ordr.push(i);
+                ordm.push(m);
+            }
+        }
+    }
+    if ordm.len() != ordr.len() {
+        panic!("This should be unreachable. Something is very wrong.");
+    }
+
+    let len = ordm.len();
+    for left in 0..len {
+        let mut smallest = left;
+        for right in (left + 1)..len {
+            if ordm[right].offset < ordm[smallest].offset {
+                smallest = right;
+            }
+        }
+        ordm.swap(smallest, left);
+        ordr.swap(smallest, left);
+    }
+   
+    for (i, m) in ordm.iter().enumerate() {
+                match ordr[i].metadatas[0].value {
                     yara::MetadataValue::String(s) => {
-                        if i.metadatas.len() > 2 {
+                        if ordr[i].metadatas.len() > 2 {
                             // Location of the IR
-                            let loc = match i.metadatas[1].value {
+                            let loc = match ordr[i].metadatas[1].value {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
                             };
                             // Starting delimeters
-                            let start = match i.metadatas[2].value {
+                            let start = match ordr[i].metadatas[2].value {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
                             };
                             // Ending delimeters
-                            let end = match i.metadatas[3].value {
+                            let end = match ordr[i].metadatas[3].value {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
                             };
@@ -135,7 +158,7 @@ fn main() {
                             };
                         } else {
                             // Add the IR without any substitution
-                            let loc = match i.metadatas[1].value {
+                            let loc = match ordr[i].metadatas[1].value {
                                 yara::MetadataValue::String(i) => i,
                                 _ => panic!("Value must be a String!"),
                             };
@@ -149,8 +172,6 @@ fn main() {
                     },
                     _ => panic!("Value must be a string!"),
                 }
-            }
-        }
     }
 
     file.write_all(ir.dump().as_bytes()).expect("Failed to write to file");

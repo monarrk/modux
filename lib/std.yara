@@ -74,3 +74,33 @@ rule Def_str
 	condition:
 	any of them
 }
+
+rule Loop_start
+{
+	meta:
+	ir = "br label %#\n#:"
+	location = "main"
+	start = "(:("
+	end = "):)"
+
+	strings:
+	$ = /loop \([a-zA-Z]*\) do/
+
+	condition:
+	any of them
+}
+
+rule Loop_end
+{
+	meta:
+	ir = "br label %#"
+	location = "main"
+	start = "("
+	end = ")"
+
+	strings:
+	$ = /end \([a-zA-Z]*\)/
+
+	condition:
+	any of them
+}

@@ -29,7 +29,7 @@ rule Fn_puts_char
 rule Fn_puts_str
 {
         meta:
-        ir = "%tmp = alloca i8*, align 8\n\tstore i8* getelementptr inbounds ([# x i8], [# x i8]* @.#, i64 0, i64 0), i8** %tmp, align 8\n\t%tmp2 = load i8*, i8** %tmp, align 8\n\tcall i32 @puts(i8* %tmp2)"
+        ir = "%$ = alloca i8*, align 8\n\tstore i8* getelementptr inbounds ([# x i8], [# x i8]* @.#, i64 0, i64 0), i8** %^1, align 8\n\t%$ = load i8*, i8** %^2, align 8\n\tcall i32 @puts(i8* %^1)"
         location = "main"
         starts = "{:{:("
         ends = "}:}:)"
